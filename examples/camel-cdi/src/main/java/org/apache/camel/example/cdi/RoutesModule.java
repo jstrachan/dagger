@@ -14,22 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.dagger;
+package org.apache.camel.example.cdi;
 
 import dagger.Module;
-import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.impl.DefaultCamelContext;
 
 import javax.enterprise.inject.Produces;
+import java.util.Arrays;
+import java.util.List;
 
 /**
+ * TODO wonder if we could generate this?
  */
 @Module
-public class CamelContextModule {
+public class RoutesModule {
     @Produces
-    public CamelContext provideCamelContext() {
-        DefaultCamelContext answer = new DefaultCamelContext();
-        return answer;
+    public List<RouteBuilder> provideRouteBuilders() {
+        return Arrays.<RouteBuilder>asList(new MyRoutes());
     }
 }

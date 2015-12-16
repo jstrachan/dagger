@@ -16,19 +16,15 @@
  */
 package org.apache.camel.dagger;
 
-import dagger.Module;
+import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.example.cdi.MyRoutes;
 
-import javax.enterprise.inject.Produces;
+import java.util.List;
 
 /**
- * TODO wonder if we could generate this?
  */
-@Module
-public class RoutesModule {
-    @Produces
-    public RouteBuilder[] provideRouteBuilders() {
-        return new RouteBuilder[]{new MyRoutes()};
-    }
+public interface CamelMakerSupport {
+    CamelContext createCamelContext();
+
+    List<RouteBuilder> createRouteBuilders();
 }

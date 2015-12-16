@@ -16,20 +16,24 @@
  */
 package org.apache.camel.dagger;
 
-import dagger.Module;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.main.Main;
 
-import javax.enterprise.inject.Produces;
+import java.util.List;
 
 /**
  */
-@Module
-public class CamelContextModule {
-    @Produces
-    public CamelContext provideCamelContext() {
-        DefaultCamelContext answer = new DefaultCamelContext();
-        return answer;
+public class CamelMain extends Main {
+    private final CamelMakerSupport camelMaker;
+
+    public CamelMain(CamelMakerSupport camelMaker) {
+        this.camelMaker = camelMaker;
+        setRouteBuilders(camelMaker.createRouteBuilders());
+    }
+
+    @Override
+    protected CamelContext createContext() {
+        return camelMaker.createCamelContext();
     }
 }

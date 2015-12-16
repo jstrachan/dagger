@@ -14,32 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.dagger;
+package org.apache.camel.example.cdi;
 
 import dagger.Component;
-import org.apache.camel.CamelContext;
-import org.apache.camel.main.Main;
+import org.apache.camel.dagger.CamelContextModule;
+import org.apache.camel.dagger.CamelMain;
+import org.apache.camel.dagger.CamelMakerSupport;
 
 import javax.inject.Singleton;
 
 /**
+ * Lets bootstrap our local routes with the camel modules
  */
 public class MyMain {
-    @Singleton
-    @Component(modules = { CamelContextModule.class, RoutesModule.class })
-    public interface CamelMaker {
-        CamelContext createCamelContext();
-    }
-
     public static void main(String[] args) throws Exception {
         final CamelMaker camelMaker = DaggerMyMain_CamelMaker.builder().build();
 
-        Main main = new Main() {
-            @Override
-            protected CamelContext createContext() {
-                return camelMaker.createCamelContext();
-            }
-        };
-        main.run();
+        new CamelMain(camelMaker).run();
     }
+
+    @Singleton
+    @Component(modules = {CamelContextModule.class, RoutesModule.class})
+    public interface CamelMaker extends CamelMakerSupport {
+    }
+
 }
