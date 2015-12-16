@@ -75,7 +75,15 @@ final class ProvidesMethodValidator {
         ValidationReport.about(providesMethodElement);
 
     Provides providesAnnotation = providesMethodElement.getAnnotation(Provides.class);
-    checkArgument(providesAnnotation != null);
+    Provides.Type type;
+    javax.enterprise.inject.Produces producesAnnotation = null;
+    if (providesAnnotation == null) {
+      producesAnnotation = providesMethodElement.getAnnotation(javax.enterprise.inject.Produces.class);
+      type = Provides.Type.UNIQUE;
+    } else {
+      type = providesAnnotation.type();
+    }
+    checkArgument(providesAnnotation != null || producesAnnotation != null);
 
     Element enclosingElement = providesMethodElement.getEnclosingElement();
     if (!isAnnotationPresent(enclosingElement, Module.class)) {
@@ -103,7 +111,7 @@ final class ProvidesMethodValidator {
     }
 
     // check mapkey is right
-    if (!providesAnnotation.type().equals(Provides.Type.MAP)
+    if (!type.equals(Provides.Type.MAP)
         && !getMapKeys(providesMethodElement).isEmpty()) {
       builder.addError(
           formatErrorMessage(BINDING_METHOD_NOT_MAP_HAS_MAP_KEY), providesMethodElement);
@@ -111,7 +119,7 @@ final class ProvidesMethodValidator {
 
     validateMethodQualifiers(builder, providesMethodElement);
 
-    switch (providesAnnotation.type()) {
+    switch (type) {
       case UNIQUE: // fall through
       case SET:
         validateKeyType(builder, returnType);

@@ -23,8 +23,8 @@
     <version>2.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>simple</artifactId>
-  <name>Examples: Simple</name>
+  <artifactId>simple-cdi</artifactId>
+  <name>Examples: Simple CDI</name>
 
   <dependencies>
     <dependency>
@@ -44,4 +44,25 @@
       <optional>true</optional>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.4.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>coffee.CoffeeApp</mainClass>
+          <classpathScope>compile</classpathScope>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

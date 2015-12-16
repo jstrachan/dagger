@@ -160,7 +160,15 @@ abstract class ProvisionBinding extends ContributionBinding {
       checkArgument(providesMethod.getKind().equals(METHOD));
       checkArgument(contributedBy.getKind().equals(TypeKind.DECLARED));
       Provides providesAnnotation = providesMethod.getAnnotation(Provides.class);
-      checkArgument(providesAnnotation != null);
+      Provides.Type provisionType;
+      javax.enterprise.inject.Produces producesAnnotation = null;
+      if (providesAnnotation == null) {
+        producesAnnotation = providesMethod.getAnnotation(javax.enterprise.inject.Produces.class);
+        provisionType = Provides.Type.UNIQUE;
+      } else {
+        provisionType = providesAnnotation.type();
+      }
+      checkArgument(providesAnnotation != null || producesAnnotation != null);
       DeclaredType declaredContainer = MoreTypes.asDeclared(contributedBy);
       ExecutableType resolvedMethod =
           MoreTypes.asExecutable(types.asMemberOf(declaredContainer, providesMethod));
@@ -181,7 +189,7 @@ abstract class ProvisionBinding extends ContributionBinding {
           Optional.of(MoreTypes.asTypeElement(declaredContainer)),
           Optional.<DependencyRequest>absent(),
           Kind.PROVISION,
-          providesAnnotation.type(),
+          provisionType,
           scope);
     }
 

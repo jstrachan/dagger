@@ -32,6 +32,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>javax.enterprise</groupId>
+      <artifactId>cdi-api</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>dagger</artifactId>
       <version>${project.version}</version>
@@ -69,6 +74,7 @@
       <scope>provided</scope> <!-- to leave out of the all-deps jar -->
       <version>1.0</version>
     </dependency>
+
 
     <dependency>
       <groupId>junit</groupId>

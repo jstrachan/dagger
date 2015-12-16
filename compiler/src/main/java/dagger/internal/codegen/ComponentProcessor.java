@@ -99,7 +99,8 @@ public final class ComponentProcessor extends BasicAnnotationProcessor {
             methodSignatureFormatter,
             Module.class,
             ImmutableList.<Class<? extends Annotation>>of(Module.class),
-            Provides.class);
+            Provides.class,
+            javax.enterprise.inject.Produces.class);
     ProvidesMethodValidator providesMethodValidator = new ProvidesMethodValidator(elements);
     BuilderValidator componentBuilderValidator =
         new BuilderValidator(elements, types, ComponentDescriptor.Kind.COMPONENT);

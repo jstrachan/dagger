@@ -66,7 +66,7 @@ final class ModuleProcessingStep implements BasicAnnotationProcessor.ProcessingS
 
   @Override
   public Set<Class<? extends Annotation>> annotations() {
-    return ImmutableSet.of(Module.class, Provides.class);
+    return ImmutableSet.of(Module.class, Provides.class, javax.enterprise.inject.Produces.class);
   }
 
   @Override
@@ -75,6 +75,17 @@ final class ModuleProcessingStep implements BasicAnnotationProcessor.ProcessingS
     // first, check and collect all provides methods
     ImmutableSet.Builder<ExecutableElement> validProvidesMethodsBuilder = ImmutableSet.builder();
     for (Element providesElement : elementsByAnnotation.get(Provides.class)) {
+      if (providesElement.getKind().equals(METHOD)) {
+        ExecutableElement providesMethodElement = (ExecutableElement) providesElement;
+        ValidationReport<ExecutableElement> methodReport =
+            providesMethodValidator.validate(providesMethodElement);
+        methodReport.printMessagesTo(messager);
+        if (methodReport.isClean()) {
+          validProvidesMethodsBuilder.add(providesMethodElement);
+        }
+      }
+    }
+    for (Element providesElement : elementsByAnnotation.get(javax.enterprise.inject.Produces.class)) {
       if (providesElement.getKind().equals(METHOD)) {
         ExecutableElement providesMethodElement = (ExecutableElement) providesElement;
         ValidationReport<ExecutableElement> methodReport =
@@ -101,6 +112,9 @@ final class ModuleProcessingStep implements BasicAnnotationProcessor.ProcessingS
             ElementFilter.methodsIn(moduleElement.getEnclosedElements());
         for (ExecutableElement methodElement : moduleMethods) {
           if (isAnnotationPresent(methodElement, Provides.class)) {
+            moduleProvidesMethodsBuilder.add(methodElement);
+          }
+          if (isAnnotationPresent(methodElement, javax.enterprise.inject.Produces.class)) {
             moduleProvidesMethodsBuilder.add(methodElement);
           }
         }

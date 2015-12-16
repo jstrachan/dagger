@@ -72,7 +72,7 @@ final class ModuleValidator {
   private final Elements elements;
   private final Class<? extends Annotation> moduleClass;
   private final ImmutableList<Class<? extends Annotation>> includedModuleClasses;
-  private final Class<? extends Annotation> methodClass;
+  private final Class<? extends Annotation>[] methodClasses;
   private final MethodSignatureFormatter methodSignatureFormatter;
 
   ModuleValidator(
@@ -81,12 +81,12 @@ final class ModuleValidator {
       MethodSignatureFormatter methodSignatureFormatter,
       Class<? extends Annotation> moduleClass,
       ImmutableList<Class<? extends Annotation>> includedModuleClasses,
-      Class<? extends Annotation> methodClass) {
+      Class<? extends Annotation>... methodClasses) {
     this.types = types;
     this.elements = elements;
     this.moduleClass = moduleClass;
     this.includedModuleClasses = includedModuleClasses;
-    this.methodClass = methodClass;
+    this.methodClasses = methodClasses;
     this.methodSignatureFormatter = methodSignatureFormatter;
   }
 
@@ -97,8 +97,11 @@ final class ModuleValidator {
     ListMultimap<String, ExecutableElement> allMethodsByName = ArrayListMultimap.create();
     ListMultimap<String, ExecutableElement> bindingMethodsByName = ArrayListMultimap.create();
     for (ExecutableElement moduleMethod : moduleMethods) {
-      if (isAnnotationPresent(moduleMethod, methodClass)) {
-        bindingMethodsByName.put(moduleMethod.getSimpleName().toString(), moduleMethod);
+      for (Class<? extends Annotation> methodClass : methodClasses) {
+        if (isAnnotationPresent(moduleMethod, methodClass)) {
+          bindingMethodsByName.put(moduleMethod.getSimpleName().toString(), moduleMethod);
+          break;
+        }
       }
       allMethodsByName.put(moduleMethod.getSimpleName().toString(), moduleMethod);
     }
@@ -132,7 +135,7 @@ final class ModuleValidator {
       if (entry.getValue().size() > 1) {
         for (ExecutableElement offendingMethod : entry.getValue()) {
           builder.addError(
-              String.format(BINDING_METHOD_WITH_SAME_NAME, methodClass.getSimpleName()),
+              String.format(BINDING_METHOD_WITH_SAME_NAME, methodClasses[0].getSimpleName()),
               offendingMethod);
         }
       }
@@ -241,6 +244,7 @@ final class ModuleValidator {
       currentClass = MoreElements.asType(types.asElement(currentClass.getSuperclass()));
       List<ExecutableElement> superclassMethods =
           ElementFilter.methodsIn(currentClass.getEnclosedElements());
+      String methodClassName = methodClasses[0].getSimpleName();
       for (ExecutableElement superclassMethod : superclassMethods) {
         String name = superclassMethod.getSimpleName().toString();
         // For each method in the superclass, confirm our @Provides methods don't override it
@@ -251,26 +255,28 @@ final class ModuleValidator {
             builder.addError(
                 String.format(
                     PROVIDES_METHOD_OVERRIDES_ANOTHER,
-                    methodClass.getSimpleName(),
+                        methodClassName,
                     methodSignatureFormatter.format(superclassMethod)),
                 providesMethod);
           }
         }
         // For each @Provides method in superclass, confirm our methods don't override it.
-        if (isAnnotationPresent(superclassMethod, methodClass)) {
-          for (ExecutableElement method : allMethodsByName.get(name)) {
-            if (!failedMethods.contains(method)
-                && elements.overrides(method, superclassMethod, subject)) {
-              failedMethods.add(method);
-              builder.addError(
-                  String.format(
-                      METHOD_OVERRIDES_PROVIDES_METHOD,
-                      methodClass.getSimpleName(),
-                      methodSignatureFormatter.format(superclassMethod)),
-                  method);
+        for (Class<? extends Annotation> methodClass : methodClasses) {
+          if (isAnnotationPresent(superclassMethod, methodClass)) {
+            for (ExecutableElement method : allMethodsByName.get(name)) {
+              if (!failedMethods.contains(method)
+                  && elements.overrides(method, superclassMethod, subject)) {
+                failedMethods.add(method);
+                builder.addError(
+                    String.format(
+                        METHOD_OVERRIDES_PROVIDES_METHOD,
+                            methodClassName,
+                        methodSignatureFormatter.format(superclassMethod)),
+                    method);
+              }
             }
           }
-        }
+          }
         allMethodsByName.put(superclassMethod.getSimpleName().toString(), superclassMethod);
       }
     }

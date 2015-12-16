@@ -216,13 +216,18 @@ abstract class Key {
       checkNotNull(method);
       checkArgument(method.getKind().equals(METHOD));
       Provides providesAnnotation = method.getAnnotation(Provides.class);
-      checkArgument(providesAnnotation != null);
+      javax.enterprise.inject.Produces producesAnnotation = null;
+      if (providesAnnotation == null) {
+        producesAnnotation = method.getAnnotation(javax.enterprise.inject.Produces.class);
+      }
+      checkArgument(providesAnnotation != null || producesAnnotation != null);
+      Provides.Type providesType = providesAnnotation != null ? providesAnnotation.type() : Provides.Type.UNIQUE;
       TypeMirror returnType = normalize(types, executableType.getReturnType());
       TypeMirror keyType =
           providesOrProducesKeyType(
               returnType,
               method,
-              Optional.of(providesAnnotation.type()),
+              Optional.of(providesType),
               Optional.<Produces.Type>absent());
       return forMethod(method, keyType);
     }
