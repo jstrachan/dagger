@@ -17,17 +17,19 @@
 package org.apache.camel.dagger;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.main.Main;
-
-import java.util.List;
 
 /**
  */
-public class CamelMain extends Main {
+public class Camel extends Main {
     private final CamelMakerSupport camelMaker;
 
-    public CamelMain(CamelMakerSupport camelMaker) {
+    public static void ride(CamelMakerSupport camelMaker) throws Exception {
+        Camel main = new Camel(camelMaker);
+        main.run();
+    }
+
+    public Camel(CamelMakerSupport camelMaker) {
         this.camelMaker = camelMaker;
         setRouteBuilders(camelMaker.createRouteBuilders());
     }

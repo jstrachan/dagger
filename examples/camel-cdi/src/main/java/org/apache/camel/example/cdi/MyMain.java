@@ -18,7 +18,7 @@ package org.apache.camel.example.cdi;
 
 import dagger.Component;
 import org.apache.camel.dagger.CamelContextModule;
-import org.apache.camel.dagger.CamelMain;
+import org.apache.camel.dagger.Camel;
 import org.apache.camel.dagger.CamelMakerSupport;
 
 import javax.inject.Singleton;
@@ -28,9 +28,8 @@ import javax.inject.Singleton;
  */
 public class MyMain {
     public static void main(String[] args) throws Exception {
-        final CamelMaker camelMaker = DaggerMyMain_CamelMaker.builder().build();
-
-        new CamelMain(camelMaker).run();
+        CamelMaker maker = DaggerMyMain_CamelMaker.builder().build();
+        Camel.ride(maker);
     }
 
     @Singleton
