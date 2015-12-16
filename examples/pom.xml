@@ -32,6 +32,7 @@
   <modules>
     <module>simple</module>
     <module>simple-cdi</module>
+    <module>camel-cdi</module>
     <module>android-simple</module>
     <module>android-activity-graphs</module>
   </modules>
